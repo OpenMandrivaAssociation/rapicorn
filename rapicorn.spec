@@ -29,6 +29,7 @@ BuildRequires:	pkgconfig(pangoft2)
 BuildRequires:	pkgconfig(pangocairo)
 BuildRequires:	pkgconfig(python)
 BuildRequires:	intltool
+BuildRequires:	bison
 
 Requires:	%{libname} = %{version}-%{release}
 
