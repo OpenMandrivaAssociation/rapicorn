@@ -32,6 +32,7 @@ BuildRequires:	intltool
 BuildRequires:	bison
 BuildRequires:	flex
 BuildRequires:	libxml2-utils
+BuildRequires:	readline-devel
 
 Requires:	%{libname} = %{version}-%{release}
 
