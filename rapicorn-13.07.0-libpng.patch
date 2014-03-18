@@ -1,0 +1,89 @@
+--- rapicorn-13.07.0/configure.in.orig	2014-03-18 09:14:23.648900151 +0000
++++ rapicorn-13.07.0/configure.in	2014-03-18 09:15:05.941901503 +0000
+@@ -270,8 +270,8 @@
+     dnl --- require libpng ---
+     if test -z "$LIBPNG"; then
+ 	dnl # png_set_add_alpha() exists only since libpng v1.2
+-	AC_MSG_CHECKING(for libpng12)
+-	if $PKG_CONFIG --exists libpng12 ; then
++	AC_MSG_CHECKING(for libpng)
++	if $PKG_CONFIG --exists libpng ; then
+ 	    AC_MSG_RESULT(yes)
+ 	    LIBPNG=`$PKG_CONFIG --libs libpng12`
+ 	elif $PKG_CONFIG --exists libpng13 ; then
+--- rapicorn-13.07.0/configure.orig	2014-03-18 09:18:06.856907287 +0000
++++ rapicorn-13.07.0/configure	2014-03-18 09:18:26.306907909 +0000
+@@ -20889,12 +20889,12 @@
+ 
+ 
+         if test -z "$LIBPNG"; then
+-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libpng12" >&5
+-$as_echo_n "checking for libpng12... " >&6; }
+-	if $PKG_CONFIG --exists libpng12 ; then
++		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libpng" >&5
++$as_echo_n "checking for libpng... " >&6; }
++	if $PKG_CONFIG --exists libpng ; then
+ 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+-	    LIBPNG=`$PKG_CONFIG --libs libpng12`
++	    LIBPNG=`$PKG_CONFIG --libs libpng`
+ 	elif $PKG_CONFIG --exists libpng13 ; then
+ 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+diff --git a/ui/pixmap.cc b/ui/pixmap.cc
+index bad4328..bb64828 100644
+--- a/ui/pixmap.cc
++++ b/ui/pixmap.cc
+@@ -6,6 +6,8 @@
+ #include <math.h>
+ #include <cstring>
+ 
++#include <unistd.h>
++
+ #define MAXDIM                          (20480) // MAXDIM*MAXDIM < 536870912
+ #define ALIGN_SIZE(size,pow2align)      ((size + (pow2align - 1)) & -pow2align)
+ 
+@@ -450,7 +452,11 @@ struct PngContext {
+   if (color_type == PNG_COLOR_TYPE_PALETTE)
+     png_set_palette_to_rgb (png_ptr);                           // request RGB format
+   if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
++#if PNG_LIBPNG_VER > 10400
++    png_set_expand_gray_1_2_4_to_8 (png_ptr);                          // request 8bit per sample
++#else
+     png_set_gray_1_2_4_to_8 (png_ptr);                          // request 8bit per sample
++#endif    
+   if (png_get_valid (png_ptr, info_ptr, PNG_INFO_tRNS))
+     png_set_tRNS_to_alpha (png_ptr);                            // request transparency as alpha channel
+   if (bit_depth == 16)
+-- 
+1.8.5.5
+
+--- rapicorn-13.07.0/ui/pixmap.cc.orig	2014-03-18 10:01:23.895468226 +0000
++++ rapicorn-13.07.0/ui/pixmap.cc	2014-03-18 10:02:07.302469613 +0000
+@@ -559,7 +559,7 @@
+   PngContext *pcontext = (PngContext*) png_get_error_ptr (png_ptr);
+   if (!pcontext->error)
+     pcontext->error = EIO;
+-  longjmp (png_ptr->jmpbuf, 1);
++  longjmp (png_jmpbuf(png_ptr), 1);
+ }
+ 
+ static void
+@@ -604,7 +604,7 @@
+       return NULL;
+     }
+   /* save stack for longjmp() in png_loader_error() */
+-  if (setjmp (png_ptr->jmpbuf) == 0)
++  if (setjmp (png_jmpbuf(png_ptr)) == 0)
+     {
+       /* read pixel image */
+       pcontext.error = EINVAL;
+@@ -664,7 +664,7 @@
+   pcontext.error = EIO;
+   png_textp text_ptr = NULL;
+   pcontext.fp = fopen (filename.c_str(), "wb");
+-  if (pcontext.fp && setjmp (png_ptr->jmpbuf) == 0)
++  if (pcontext.fp && setjmp (png_jmpbuf(png_ptr)) == 0)
+     {
+       /* write pixel image */
+       pcontext.error = EIO;
