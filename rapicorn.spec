@@ -30,6 +30,8 @@ BuildRequires:	pkgconfig(pangocairo)
 BuildRequires:	pkgconfig(python)
 BuildRequires:	intltool
 BuildRequires:	bison
+BuildRequires:	flex
+BuildRequires:	libxml2-utils
 
 Requires:	%{libname} = %{version}-%{release}
 
