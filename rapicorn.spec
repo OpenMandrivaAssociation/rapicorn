@@ -14,7 +14,7 @@
 Name:		rapicorn
 Summary:	Rapid development toolkit
 Version:	13.07.0
-Release:	1
+Release:	2
 Source0:	http://rapicorn.org/dist/%{name}/%{name}-%{version}.tar.bz2
 Patch0:		rapicorn-13.07.0-libpng.patch
 URL:		https://testbit.eu/wiki/Rapicorn_Home
