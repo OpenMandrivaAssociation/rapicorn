@@ -20,6 +20,11 @@ Patch0:		rapicorn-13.07.0-libpng.patch
 URL:		https://testbit.eu/wiki/Rapicorn_Home
 License:	GPLv2+
 Group:		Sound
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	pkgconfig(cairo)
 BuildRequires:	pkgconfig(glib-2.0)
 BuildRequires:	pkgconfig(gio-2.0)
